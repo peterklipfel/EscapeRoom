@@ -24,4 +24,12 @@ public:
 private:
     // how far player can "reach" to pick up objects
     float Reach=100.f;
+    
+    UPhysicsHandleComponent* physicsHandle = nullptr;
+    
+    UInputComponent* inputComponent = nullptr;
+    
+    void Grab();
+    
+    void Release();
 };

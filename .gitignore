@@ -69,3 +69,5 @@ Content/StarterContent
 
 **/xcuserdata
 contents.xcworkspacedata
+
+.DS_Store
