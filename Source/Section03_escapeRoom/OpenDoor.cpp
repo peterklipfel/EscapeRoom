@@ -3,6 +3,7 @@
 #include "Section03_escapeRoom.h"
 #include "OpenDoor.h"
 
+#define OUT
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
@@ -21,7 +22,6 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
     
-    ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
     Owner = GetOwner();
 }
 
@@ -35,12 +35,23 @@ void UOpenDoor::CloseDoor()
     Owner->SetActorRotation(FRotator(0.0f, 270.0f, 0.0f));
 }
 
+float UOpenDoor::getTotalMassOnPressurePlate(){
+    float totalMass = 0.f;
+    TArray<AActor*> overlappingActors;
+    PressurePlate->GetOverlappingActors(OUT overlappingActors);
+    
+    for (const AActor* actor : overlappingActors){
+        totalMass += actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+    }
+    return totalMass;
+}
+
 // Called every frame
 void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
     float currentTime = GetWorld()->GetTimeSeconds();
-    if(PressurePlate->IsOverlappingActor(ActorThatOpens)){
+    if(getTotalMassOnPressurePlate() > triggerWeight){
         OpenDoor();
         LastDoorOpenTime = currentTime;
     }
