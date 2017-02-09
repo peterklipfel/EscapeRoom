@@ -29,7 +29,16 @@ private:
     
     UInputComponent* inputComponent = nullptr;
     
-    void Grab();
+    FHitResult AttemptGrabForPhysicsBody();
     
+    void GetPhysicsHandleComponent();
+    void SetupInputComponent();
+    
+    FVector playerLocation();
+    FRotator playerRotation();
+    
+    FVector getReachLimit();
+    
+    void Grab();
     void Release();
 };
