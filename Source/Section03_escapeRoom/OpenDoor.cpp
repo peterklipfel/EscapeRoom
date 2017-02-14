@@ -21,24 +21,17 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-    
-    Owner = GetOwner();
-}
-
-void UOpenDoor::OpenDoor()
-{
-    Owner->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
-}
-
-void UOpenDoor::CloseDoor()
-{
-    Owner->SetActorRotation(FRotator(0.0f, 270.0f, 0.0f));
+    if(!pressurePlate){
+        UE_LOG(LogTemp, Error, TEXT("Pressure Plate not set"));
+        return;
+    }
 }
 
 float UOpenDoor::getTotalMassOnPressurePlate(){
     float totalMass = 0.f;
     TArray<AActor*> overlappingActors;
-    PressurePlate->GetOverlappingActors(OUT overlappingActors);
+    if(!pressurePlate){ return totalMass; }
+    pressurePlate->GetOverlappingActors(OUT overlappingActors);
     
     for (const AActor* actor : overlappingActors){
         totalMass += actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
@@ -52,12 +45,9 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
     float currentTime = GetWorld()->GetTimeSeconds();
     if(getTotalMassOnPressurePlate() > triggerWeight){
-        OpenDoor();
-        LastDoorOpenTime = currentTime;
-    }
-    if( currentTime - LastDoorOpenTime > DoorCloseDelay ){
-        
-        CloseDoor();
+        onOpen.Broadcast();
+    } else {
+        onClose.Broadcast();
     }
 }
 

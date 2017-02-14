@@ -30,12 +30,14 @@ void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
     
+    if(!physicsHandle){ return; }
     if(physicsHandle->GrabbedComponent){
         physicsHandle->SetTargetLocation(getReachLimit());
     }
 }
 
 void UGrabber::GetPhysicsHandleComponent(){
+    if(!GetOwner()){ return; }
     FString name = GetOwner()->GetName();
     physicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 //    GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
@@ -47,6 +49,7 @@ void UGrabber::GetPhysicsHandleComponent(){
 }
 
 void UGrabber::SetupInputComponent(){
+    if(!GetOwner()){ return; }
     FString name = GetOwner()->GetName();
     inputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
     if(inputComponent){
@@ -62,17 +65,33 @@ void UGrabber::SetupInputComponent(){
 
 void UGrabber::Grab() {
     UE_LOG(LogTemp, Warning, TEXT("Grab Pressed!"));
+
+    if(!physicsHandle){ return; }
+
     FHitResult hitResult = AttemptGrabForPhysicsBody();
     UPrimitiveComponent* componentToGrab = hitResult.GetComponent();
+    if(!componentToGrab){
+        UE_LOG(LogTemp, Error, TEXT("hitResult.GetComponent Failed"));
+        return;
+    }
     AActor* hitActor = hitResult.GetActor();
     
     if(hitActor){
       physicsHandle->GrabComponent(componentToGrab, NAME_None, componentToGrab->GetOwner()->GetActorLocation(), true);
+    } else {
+        UE_LOG(LogTemp, Error, TEXT("hitActor Failed"));
+        return;
     }
 }
 
 void UGrabber::Release() {
     UE_LOG(LogTemp, Warning, TEXT("Grab Released!"));
+
+    if(!physicsHandle){
+        UE_LOG(LogTemp, Error, TEXT("No physics handle"));
+        return;
+    }
+
     physicsHandle->ReleaseComponent();
 }
 
